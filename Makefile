@@ -1,7 +1,7 @@
 run:
 	./szachy
 build:
-	g++ ./main.cpp ./src/*.cpp ./src/*.h -o szachy
+	g++ ./main.cpp ./src/*.cpp ./src/*.h ./src/*.hpp -o szachy
 clean:
 	rm ./szachy
 memtest:
