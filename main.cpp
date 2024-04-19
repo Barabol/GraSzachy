@@ -1,5 +1,6 @@
 #include "./src/constants.h"
 #include <stdio.h>
+
 class pieces {
 public:
   Names Type;
@@ -8,6 +9,26 @@ public:
   void promote(Names type) {
     if (this->Type == Pawn && type != Pawn)
       this->Type = type;
+  }
+  char symbol() {
+    switch (this->Type) {
+    case Pawn:
+      return 'P';
+    case Knight:
+      return 'N';
+    case Bishop:
+      return 'B';
+    case Rook:
+      return 'R';
+    case Queen:
+      return 'Q';
+    case King:
+      return 'K';
+    }
+    return '?';
+  }
+  void flag(short x, short y,
+            char flag[2][8]) { // i chun do przeniesienia do planszy )-:<
   }
   char value() {
     if (this->Type == Bishop)
@@ -34,42 +55,38 @@ public:
       for (int y = 0; y < 8; y++)
         this->layout[x][y]->~pieces();
   }
+  void tag(short x, short y) { this->tag_[1] = x, this->tag_[0] = y; }
   void cmdBoard(bool useColors) {
 
-    const char BG[2][7] = {{"\x1b[46m"}, {"\x1b[42m"}};
-    const char PC[2][6] = {{"\x1b[37m"}, {"\x1b[30m"}};
+    const char BG[4][7] = {
+        {"\x1b[46m"}, {"\x1b[42m"}, {"\x1b[41m"}, {"\x1b[105m"}};
+    const char PC[2][8] = {{"\x1b[1;37m"}, {"\x1b[1;30m"}};
     char Symbol = ' ';
+    char bgstyle;
+    // flag[0][0] = -1;
     char colorek = 0;
     if (useColors) {
+      printf("\x1b[44;1;31m   ");
+      for (int x = 0; x < 8; x++)
+        printf("\x1b[44;1;31m%c ", 'A' + x);
+      puts("\x1b[0m");
       for (int x = 0; x < 8; x++) {
+        printf("\x1b[44;1;31m %c \x1b[0m", '8' - x);
         for (int y = 0; y < 8; y++) {
           if (this->layout[x][y]) {
-            switch (this->layout[x][y]->Type) {
-            case Pawn:
-              Symbol = 'P';
-              break;
-            case Knight:
-              Symbol = 'N';
-              break;
-            case Bishop:
-              Symbol = 'B';
-              break;
-            case Rook:
-              Symbol = 'R';
-              break;
-            case Queen:
-              Symbol = 'Q';
-              break;
-            case King:
-              Symbol = 'K';
-              break;
-            }
+            Symbol = this->layout[x][y]->symbol();
             colorek = this->layout[x][y]->Color;
             if (colorek)
               Symbol += 32;
           } else
             Symbol = ' ';
-          printf("%s%s%c \x1b[0m", BG[(x + y) & 1], PC[colorek], Symbol);
+          if (flag[0][x] & 1 << y)
+            bgstyle = 2;
+          else
+            bgstyle = (x + y) & 1;
+          if (this->tag_[0] == x && this->tag_[1] == y)
+            bgstyle = 3;
+          printf("%s%s%c \x1b[0m", BG[bgstyle], PC[colorek], Symbol);
         }
         printf("\n");
       }
@@ -77,27 +94,8 @@ public:
       for (int x = 0; x < 8; x++) {
         for (int y = 0; y < 8; y++) {
           if (this->layout[x][y]) {
-            switch (this->layout[x][y]->Type) {
-            case Pawn:
-              Symbol = 'P';
-              break;
-            case Knight:
-              Symbol = 'N';
-              break;
-            case Bishop:
-              Symbol = 'B';
-              break;
-            case Rook:
-              Symbol = 'R';
-              break;
-            case Queen:
-              Symbol = 'Q';
-              break;
-            case King:
-              Symbol = 'K';
-              break;
-            }
             colorek = this->layout[x][y]->Color;
+            Symbol = this->layout[x][y]->symbol();
             if (colorek)
               Symbol += 32;
           } else
@@ -127,14 +125,129 @@ public:
       this->layout[7][x] = new pieces(Based[x], White);
     }
   }
+  void flag_all() {
+    for (int x = 0; x < 8; x++)
+      for (int y = 0; y < 8; y++)
+        if (this->layout[y][x])
+          this->_flag(x, y);
+  }
+
+  void flagforme(short x, short y) {
+    _flag(x, y);
+    cmdBoard(true);
+  }
+  void name(short x, short y) {
+    if (this->layout[x][y])
+      printf(">>> %c \n", this->layout[x][y]->symbol());
+  }
 
 private:
+  void _flag(const short x, const short y) {
+    pieces const *piece = layout[y][x];
+    switch (piece->Type) {
+    case Pawn:
+      if (y + 1 < 8 && piece->Color) {
+        if (x + 1 < 8)
+          this->flag[piece->Color][y + 1] |= 1 << (x + 1);
+        if (x - 1 > -1)
+          this->flag[piece->Color][y + 1] |= 1 << (x - 1);
+      } else if (y - 1 > -1 && !piece->Color) {
+        if (x + 1 < 8)
+          this->flag[piece->Color][y - 1] |= 1 << (x + 1);
+        if (x - 1 > -1)
+          this->flag[piece->Color][y - 1] |= 1 << (x - 1);
+      }
+      break;
+    case Knight:
+      if (y + 1 < 8) {
+        if (x + 2 < 8)
+          this->flag[piece->Color][y + 1] |= 1 << (x + 2);
+        if (x - 2 > -1)
+          this->flag[piece->Color][y + 1] |= 1 << (x - 2);
+      }
+      if (y - 1 > -1) {
+        if (x + 2 < 8)
+          this->flag[piece->Color][y - 1] |= 1 << (x + 2);
+        if (x - 2 > -1)
+          this->flag[piece->Color][y - 1] |= 1 << (x - 2);
+      }
+      if (y + 2 < 8) {
+        if (x + 1 < 8)
+          this->flag[piece->Color][y + 2] |= 1 << (x + 1);
+        if (x - 1 > -1)
+          this->flag[piece->Color][y + 2] |= 1 << (x - 1);
+      }
+      if (y - 2 > -1) {
+        if (x + 1 < 8)
+          this->flag[piece->Color][y - 2] |= 1 << (x + 1);
+        if (x - 1 > -1)
+          this->flag[piece->Color][y - 2] |= 1 << (x - 1);
+      }
+      break;
+    case Queen:
+    case Bishop:
+      for (int m = x + 1, n = y + 1; m < 8 && n < 8; m++, n++) {
+        this->flag[piece->Color][n] |= 1 << (m);
+        if (this->layout[n][m])
+          break;
+      }
+      for (int m = x - 1, n = y - 1; m > -1 && n > -1; m--, n--) {
+        this->flag[piece->Color][n] |= 1 << (m);
+        if (this->layout[n][m])
+          break;
+      }
+      for (int m = x + 1, n = y - 1; m < 8 && n > -1; m++, n--) {
+        this->flag[piece->Color][n] |= 1 << (m);
+        if (this->layout[n][m])
+          break;
+      }
+      for (int m = x - 1, n = y + 1; m > -1 && n < 8; m--, n++) {
+        this->flag[piece->Color][n] |= 1 << (m);
+        if (this->layout[n][m])
+          break;
+      }
+      if (piece->Type == Bishop)
+        break;
+    case Rook:
+      for (int m = x + 1; m < 8; m++) { // prawo
+        this->flag[piece->Color][y] |= 1 << (m);
+        if (this->layout[y][m])
+          break;
+      }
+
+      for (int m = x - 1; m > -1; m--) { // lewo
+        this->flag[piece->Color][y] |= 1 << (m);
+        if (this->layout[y][m])
+          break;
+      }
+
+      for (int m = y + 1; m < 8; m++) { // góra
+        this->flag[piece->Color][m] |= 1 << (x);
+        if (this->layout[m][x])
+          break;
+      }
+      for (int m = (y - 1); m > -1; m--) { // dół
+        this->flag[piece->Color][m] |= 1 << (x);
+        if (this->layout[m][x])
+          break;
+      }
+      break;
+    case King:
+      break;
+    }
+  }
+
   pieces *layout[8][8];
   char flag[2][8];
+  char tag_[2];
 };
 int main() {
   chessBoard board;
   board.clear();
+  board.tag(-1, -1);
   board.cmdBoard(true);
-  board.cmdBoard(false);
+  board.flagforme(3, 7);
+  board.tag(2, 1);
+  board.name(1, 1);
+  board.cmdBoard(true);
 }
