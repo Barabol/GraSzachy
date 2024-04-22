@@ -1,13 +1,22 @@
 #ifndef CONSTANTS
 #define CONSTANTS
-#define W_CHUJ 9999
+
 typedef enum {
-  Pawn = 1,
-  Bishop = 3,
-  Knight = 4, // potem będzie podmieniane
-  Rook = 5,
-  Queen = 9,
-  King = W_CHUJ
+  Pawn = 0,
+  Bishop = 1,
+  Knight = 2, // potem będzie podmieniane
+  Rook = 3,
+  Queen = 4,
+  King = 5
 } Names;
 typedef enum { White = 0, Black = 1 } Colors;
+#define BUTTON_SIZE 90
+#define WINDOW_W 1280
+#define WINDOW_H 720
+#define FRAMES 30
+typedef struct {
+  Colors color;
+  Names name;
+} pawn_struct;
+extern pawn_struct PAWNER;
 #endif // !

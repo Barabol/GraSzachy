@@ -1,5 +1,6 @@
 #include "board.hpp"
-#include <iostream>
+#include "constants.h"
+#include <stdio.h>
 void pieces::promote(Names type) {
   if (this->Type == Pawn && type != Pawn)
     this->Type = type;
@@ -27,10 +28,14 @@ pieces::pieces(Names type, Colors color) {
 }
 pieces::~pieces(){};
 //---------------------------------------------//
-char pieces::value() {
-  if (this->Type == Bishop)
-    return 3;
-  return this->Type;
+pawn_struct *chessBoard::value(short x, short y) {
+  static pawn_struct *ret = new pawn_struct;
+  if (this->layout[y][x]) {
+    ret->name = this->layout[y][x]->Type;
+    ret->color = this->layout[y][x]->Color;
+    return ret;
+  }
+  return nullptr;
 }
 chessBoard::chessBoard() {
   for (int x = 0; x < 8; x++)
@@ -95,9 +100,14 @@ void chessBoard::cmdBoard(bool useColors) {
     }
   }
 }
-void chessBoard::clear() {
+void chessBoard::clear(unsigned int timer) {
   const Names Based[8] = {Rook, Knight, Bishop, Queen,
                           King, Bishop, Knight, Rook};
+  this->Time[0] = timer;
+  this->Time[1] = timer;
+  this->playing = White;
+  this->Points[0] = 0;
+  this->Points[1] = 0;
   for (int x = 0; x < 8; x++)
     for (int y = 0; y < 8; y++) {
       if (this->layout[x][y]) {
@@ -113,6 +123,7 @@ void chessBoard::clear() {
     this->layout[6][x] = new pieces(Pawn, White);
     this->layout[7][x] = new pieces(Based[x], White);
   }
+  this->tag(-1, -1);
 }
 void chessBoard::flag_all() {
   for (int x = 0; x < 8; x++)
