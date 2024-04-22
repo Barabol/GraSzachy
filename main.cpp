@@ -8,6 +8,7 @@
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/bitmap.h>
 #include <allegro5/bitmap_draw.h>
+#include <allegro5/bitmap_io.h>
 #include <allegro5/color.h>
 #include <allegro5/display.h>
 #include <allegro5/events.h>
@@ -16,7 +17,7 @@
 #include <allegro5/timer.h>
 #include <cstdio>
 void render(chessBoard *board, ALLEGRO_BITMAP *pieces[2][6],
-            ALLEGRO_FONT *font) {
+            ALLEGRO_BITMAP *mark, ALLEGRO_FONT *font) {
   pawn_struct *pwn;
   static const ALLEGRO_COLOR colors[2] = {al_map_rgb(255, 0, 0),
                                           al_map_rgb(0, 255, 0)};
@@ -30,6 +31,8 @@ void render(chessBoard *board, ALLEGRO_BITMAP *pieces[2][6],
       if (pwn)
         al_draw_bitmap(pieces[pwn->color][pwn->name], BUTTON_SIZE * x,
                        BUTTON_SIZE * y, 0);
+      if (board->moves[y] & 1 << (x))
+        al_draw_bitmap(mark, BUTTON_SIZE * x, BUTTON_SIZE * y, 0);
     }
 
   al_draw_textf(font, al_map_rgb(0, 255, 0), 800, 30, 0, "Timer: %d:%d",
@@ -57,16 +60,17 @@ int main() {
   al_install_audio();
   ALLEGRO_DISPLAY *display = al_create_display(WINDOW_W, WINDOW_H);
 
+  ALLEGRO_BITMAP *mark = al_load_bitmap("src/resorces/graphics/mark.png");
   ALLEGRO_BITMAP *pieces[2][6] = {
       {al_load_bitmap("src/resorces/graphics/wp.png"),
-       al_load_bitmap("src/resorces/graphics/wn.png"),
        al_load_bitmap("src/resorces/graphics/wb.png"),
+       al_load_bitmap("src/resorces/graphics/wn.png"),
        al_load_bitmap("src/resorces/graphics/wr.png"),
        al_load_bitmap("src/resorces/graphics/wq.png"),
        al_load_bitmap("src/resorces/graphics/wk.png")},
       {al_load_bitmap("src/resorces/graphics/bp.png"),
-       al_load_bitmap("src/resorces/graphics/bn.png"),
        al_load_bitmap("src/resorces/graphics/bb.png"),
+       al_load_bitmap("src/resorces/graphics/bn.png"),
        al_load_bitmap("src/resorces/graphics/br.png"),
        al_load_bitmap("src/resorces/graphics/bq.png"),
        al_load_bitmap("src/resorces/graphics/bk.png")}};
@@ -97,7 +101,7 @@ int main() {
         pframes = 0;
         board.Time[board.playing]--;
       }
-      render(&board, pieces, font);
+      render(&board, pieces, mark, font);
       break;
     case 10:
       switch (event.keyboard.keycode) {
@@ -116,6 +120,9 @@ int main() {
       board.cmdBoard(true);
       pawn = board.value((int)(event.mouse.x / BUTTON_SIZE),
                          (int)(event.mouse.y / BUTTON_SIZE));
+      board.findMoves((int)(event.mouse.x / BUTTON_SIZE),
+                      (int)(event.mouse.y / BUTTON_SIZE));
+
       if (pawn)
         printf("%d , %d \n", pawn->color, pawn->name);
       break;
@@ -130,6 +137,7 @@ int main() {
   al_destroy_font(font);
   for (int x = 0; x < 12; x++)
     al_destroy_bitmap(pieces[0][x]);
+  al_destroy_bitmap(mark);
   al_uninstall_audio();
   al_destroy_display(display);
   al_uninstall_mouse();

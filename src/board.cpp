@@ -48,6 +48,124 @@ chessBoard::~chessBoard() {
       this->layout[x][y]->~pieces();
 }
 void chessBoard::tag(short x, short y) { this->tag_[1] = x, this->tag_[0] = y; }
+void chessBoard::findMoves(short x, short y) { // dodać sprawdzanko na FF
+  pieces const *piece = layout[y][x];
+  if (!piece || piece->Color != this->playing)
+    return;
+  for (int X = 0; X < 8; X++)
+    this->moves[X] = 0;
+  switch (piece->Type) {
+  case Pawn:
+    if (!this->layout[y][x]->Color) {
+      if (this->layout[y][x]->notMoved)
+        this->moves[y - 2] |= 1 << (x);
+      if (y - 1 > -1)
+        this->moves[y - 1] |= 1 << (x);
+    } else {
+      if (this->layout[y][x]->notMoved)
+        this->moves[y + 2] |= 1 << (x);
+      if (y + 1 < 8)
+        this->moves[y + 1] |= 1 << (x);
+    }
+    break;
+  case Knight:
+    if (y + 1 < 8) {
+      if (x + 2 < 8)
+        this->moves[y + 1] |= 1 << (x + 2);
+      if (x - 2 > -1)
+        this->moves[y + 1] |= 1 << (x - 2);
+    }
+    if (y - 1 > -1) {
+      if (x + 2 < 8)
+        this->moves[y - 1] |= 1 << (x + 2);
+      if (x - 2 > -1)
+        this->moves[y - 1] |= 1 << (x - 2);
+    }
+    if (y + 2 < 8) {
+      if (x + 1 < 8)
+        this->moves[y + 2] |= 1 << (x + 1);
+      if (x - 1 > -1)
+        this->moves[y + 2] |= 1 << (x - 1);
+    }
+    if (y - 2 > -1) {
+      if (x + 1 < 8)
+        this->moves[y - 2] |= 1 << (x + 1);
+      if (x - 1 > -1)
+        this->moves[y - 2] |= 1 << (x - 1);
+    }
+    break;
+  case Queen:
+  case Bishop:
+    for (int m = x + 1, n = y + 1; m < 8 && n < 8; m++, n++) {
+      this->moves[n] |= 1 << (m);
+      if (this->layout[n][m])
+        break;
+    }
+    for (int m = x - 1, n = y - 1; m > -1 && n > -1; m--, n--) {
+      this->moves[n] |= 1 << (m);
+      if (this->layout[n][m])
+        break;
+    }
+    for (int m = x + 1, n = y - 1; m < 8 && n > -1; m++, n--) {
+      this->moves[n] |= 1 << (m);
+      if (this->layout[n][m])
+        break;
+    }
+    for (int m = x - 1, n = y + 1; m > -1 && n < 8; m--, n++) {
+      this->moves[n] |= 1 << (m);
+      if (this->layout[n][m])
+        break;
+    }
+    if (piece->Type == Bishop)
+      break;
+  case Rook:
+    for (int m = x + 1; m < 8; m++) { // prawo
+      this->moves[y] |= 1 << (m);
+      if (this->layout[y][m])
+        break;
+    }
+    for (int m = x - 1; m > -1; m--) { // lewo
+      this->moves[y] |= 1 << (m);
+      if (this->layout[y][m])
+        break;
+    }
+    for (int m = y + 1; m < 8; m++) { // góra
+      this->moves[m] |= 1 << (x);
+      if (this->layout[m][x])
+        break;
+    }
+    for (int m = (y - 1); m > -1; m--) { // dół
+      this->moves[m] |= 1 << (x);
+      if (this->layout[m][x])
+        break;
+    }
+    break;
+  case King: // co ja najlepszego zrobiłem?!
+    if (x + 1 < 8) {
+      if (y + 1 < 8 && !(this->flag[~(piece->Color) & 1][y + 1] & 1 << (x + 1)))
+        this->moves[y + 1] |= 1 << (x + 1);
+      if (y - 1 > -1 &&
+          !(this->flag[~(piece->Color) & 1][y - 1] & 1 << (x + 1)))
+        this->moves[y - 1] |= 1 << (x + 1);
+      if (!(this->flag[~(piece->Color) & 1][y] & 1 << (x + 1)))
+        this->moves[y] |= 1 << (x + 1);
+    }
+    if (x - 1 > -1) {
+      if (y + 1 < 8 && !(this->flag[~(piece->Color) & 1][y + 1] & 1 << (x - 1)))
+        this->moves[y + 1] |= 1 << (x - 1);
+      if (y - 1 > -1 &&
+          !(this->flag[~(piece->Color) & 1][y - 1] & 1 << (x - 1)))
+        this->moves[y - 1] |= 1 << (x - 1);
+      if (!(this->flag[~(piece->Color) & 1][y] & 1 << (x - 1)))
+        this->moves[y] |= 1 << (x - 1);
+    }
+    if (y + 1 < 8 && !(this->flag[~(piece->Color) & 1][y + 1] & 1 << (x)))
+      this->moves[y + 1] |= 1 << (x);
+    if (y - 1 > -1 && !(this->flag[~(piece->Color) & 1][y - 1] & 1 << (x)))
+      this->moves[y - 1] |= 1 << (x);
+    break;
+  }
+}
 void chessBoard::cmdBoard(bool useColors) {
 
   const char BG[4][7] = {
@@ -103,6 +221,8 @@ void chessBoard::cmdBoard(bool useColors) {
 void chessBoard::clear(unsigned int timer) {
   const Names Based[8] = {Rook, Knight, Bishop, Queen,
                           King, Bishop, Knight, Rook};
+  for (int x = 0; x < 8; x++)
+    this->moves[x] = 0;
   this->Time[0] = timer;
   this->Time[1] = timer;
   this->playing = White;
@@ -230,7 +350,29 @@ void chessBoard::_flag(const short x, const short y) {
         break;
     }
     break;
-  case King:
+  case King: // co ja najlepszego zrobiłem?!
+    if (x + 1 < 8) {
+      if (y + 1 < 8 && !(this->flag[~(piece->Color) & 1][y + 1] & 1 << (x + 1)))
+        this->flag[piece->Color][y + 1] |= 1 << (x + 1);
+      if (y - 1 > -1 &&
+          !(this->flag[~(piece->Color) & 1][y - 1] & 1 << (x + 1)))
+        this->flag[piece->Color][y - 1] |= 1 << (x + 1);
+      if (!(this->flag[~(piece->Color) & 1][y] & 1 << (x + 1)))
+        this->flag[piece->Color][y] |= 1 << (x + 1);
+    }
+    if (x - 1 > -1) {
+      if (y + 1 < 8 && !(this->flag[~(piece->Color) & 1][y + 1] & 1 << (x - 1)))
+        this->flag[piece->Color][y + 1] |= 1 << (x - 1);
+      if (y - 1 > -1 &&
+          !(this->flag[~(piece->Color) & 1][y - 1] & 1 << (x - 1)))
+        this->flag[piece->Color][y - 1] |= 1 << (x - 1);
+      if (!(this->flag[~(piece->Color) & 1][y] & 1 << (x - 1)))
+        this->flag[piece->Color][y] |= 1 << (x - 1);
+    }
+    if (y + 1 < 8 && !(this->flag[~(piece->Color) & 1][y + 1] & 1 << (x)))
+      this->flag[piece->Color][y + 1] |= 1 << (x);
+    if (y - 1 > -1 && !(this->flag[~(piece->Color) & 1][y - 1] & 1 << (x)))
+      this->flag[piece->Color][y - 1] |= 1 << (x);
     break;
   }
 }

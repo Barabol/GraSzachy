@@ -21,11 +21,13 @@ public:
   void clear(unsigned int timer);
   void flag_all();
   void flagforme(short x, short y);
+  void findMoves(short x, short y);
   void name(short x, short y);
   pawn_struct *value(short x, short y);
   unsigned int Time[2];
   unsigned char Points[2];
   char playing;
+  char moves[8];
 
 private:
   void _flag(const short x, const short y);
