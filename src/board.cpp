@@ -154,7 +154,11 @@ void chessBoard::findMoves(short x, short y) {
         break;
     }
     break;
-  case King: // co ja najlepszego zrobiłem?!
+  case King: // KRÓL MUSI SPRAWDZAĆ CZY TO NIE JEGO KOLOR TU BO TAK
+             // sprawdzanie szacha będzie banalne sprawdzić czy moves króla
+             // równe 0 i czy jest jego pozycja na flag od przeciwnika i
+             // szukanko pojedynczych figur przeciwnika ktore go szachoja i czy
+             // sa sflagowane przez gracza
     this->flag_all();
     if (x + 1 < 8) {
       if (y + 1 < 8 && !(this->flag[~(piece->Color) & 1][y + 1] & 1 << (x + 1)))
