@@ -28,15 +28,19 @@ public:
   unsigned char Points[2];
   char playing;
   char moves[8];
-  void move(short x, short y);
+  char move(short x, short y);
 
 private:
   void _flag(const short x, const short y);
+  void _flag4szach(const short x, const short y);
+  char isunszachable();
   pieces *layout[8][8];
   char flag[2][8];
   char tag_[2];
   char selected[2];
-  char prevSelected[2];
+  char flagprototype[8];
+  char selectedBefore[2];
+  char szach[2];
   char Kings[2][2];
 };
 #endif

@@ -122,7 +122,10 @@ int main() {
                 (int)(event.mouse.y / BUTTON_SIZE));
       printf("<%d>\n", board.moves[y] & 1 << x);
       if (board.moves[y] & 1 << x)
-        board.move(x, y);
+        if (board.move(x, y)) {
+          printf("Wygrywa %d\n", (~board.playing) & 1);
+          board.clear(1200);
+        }
       pawn = board.value((int)(event.mouse.x / BUTTON_SIZE),
                          (int)(event.mouse.y / BUTTON_SIZE));
       board.findMoves((int)(event.mouse.x / BUTTON_SIZE),
