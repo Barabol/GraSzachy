@@ -48,9 +48,9 @@ void render(chessBoard *board, ALLEGRO_BITMAP *pieces[2][6],
 int main() {
   chessBoard board;
   board.clear(1200);
-  board.cmdBoard(true);
   board.flag_all();
-  board.cmdBoard(true);
+  board.cmdBoard(true, White);
+  board.cmdBoard(true, Black);
   al_init();
   al_install_mouse();
   al_install_keyboard();
@@ -92,6 +92,7 @@ int main() {
   char active = 1;
   char pframes = 0;
   pawn_struct *pawn;
+  short x, y;
   while (active) {
     al_wait_for_event(queue, &event);
     switch (event.type) {
@@ -113,16 +114,22 @@ int main() {
     case 20: // move
       break;
     case 21: // click
+      x = (int)(event.mouse.x / BUTTON_SIZE);
+      y = (int)(event.mouse.y / BUTTON_SIZE);
       printf("%d = %d\n", (int)(event.mouse.x / BUTTON_SIZE),
              (int)(event.mouse.y / BUTTON_SIZE));
       board.tag((int)(event.mouse.x / BUTTON_SIZE),
                 (int)(event.mouse.y / BUTTON_SIZE));
-      board.cmdBoard(true);
+      printf("<%d>\n", board.moves[y] & 1 << x);
+      if (board.moves[y] & 1 << x)
+        board.move(x, y);
       pawn = board.value((int)(event.mouse.x / BUTTON_SIZE),
                          (int)(event.mouse.y / BUTTON_SIZE));
       board.findMoves((int)(event.mouse.x / BUTTON_SIZE),
                       (int)(event.mouse.y / BUTTON_SIZE));
-
+      board.flag_all();
+      board.cmdBoard(true, White);
+      board.cmdBoard(true, Black);
       if (pawn)
         printf("%d , %d \n", pawn->color, pawn->name);
       break;
