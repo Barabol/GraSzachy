@@ -212,8 +212,8 @@ void chessBoard::findMoves(short x, short y) {
 void chessBoard::_flag4szach(
     const short x, const short y) { // tu jest coś nie tak chyba nie reternuje
                                     // //tia coś się nie imie
+                                    // podmienić na możliwe ruchy szachowanego!!
   const pieces *piece = this->layout[y][x];
-  puts("???");
   this->cmdBoard(true, White);
   for (int z = 0; z < 8; z++)
     this->flagprototype[z] = 0;
@@ -347,7 +347,14 @@ char chessBoard::isunszachable() {
     return 0;
   return 1;
 }
-char chessBoard::move(short x, short y) {
+char chessBoard::move(short x,
+                      short y) { //
+                                 // selectedBefore nie dizała bo uznaje ostatnio
+                                 // ruszone a nie realnie szachujące
+                                 // można by to wywyołać dopier o jak sprawdze
+                                 // że selectedBefore nie szachuje
+                                 //
+                                 // nwm
   static const unsigned char PValues[6] = {1, 3, 3, 5, 9, 10};
   if (this->szach[playing] &&
       this->layout[this->selected[1]][this->selected[0]]->Type != King) {
@@ -401,6 +408,8 @@ char chessBoard::move(short x, short y) {
       return 1;
     this->flag_all();
   }
+  if (this->layout[y][x]->Type == Pawn && (y == 0 || y == 7))
+    return 2;
   for (int z = 0; z < 8; z++)
     this->moves[z] = 0;
   return 0;
@@ -505,7 +514,11 @@ void chessBoard::flag_all() {
 }
 
 void chessBoard::flagforme(short x, short y) {
-  this->_flag(x, y);
+jeszczeraz:
+  if (this->layout[y][x])
+    this->_flag(x, y);
+  else
+    goto jeszczeraz;
   this->cmdBoard(true, White);
   this->cmdBoard(true, Black);
 }

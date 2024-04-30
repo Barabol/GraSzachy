@@ -16,8 +16,18 @@
 #include <allegro5/mouse.h>
 #include <allegro5/timer.h>
 #include <cstdio>
+#include <cstdlib>
+#include <ctime>
+void renderPromotionBox(ALLEGRO_BITMAP *pieces[2][6], Colors color) {
+  al_draw_filled_rectangle(BUTTON_SIZE * 2, BUTTON_SIZE * 3.5, BUTTON_SIZE * 6,
+                           BUTTON_SIZE * 4.5, al_map_rgb(150, 150, 150));
+  al_draw_bitmap(pieces[color][1], BUTTON_SIZE * 2, BUTTON_SIZE * 3.5, 0);
+  al_draw_bitmap(pieces[color][2], BUTTON_SIZE * 3, BUTTON_SIZE * 3.5, 0);
+  al_draw_bitmap(pieces[color][3], BUTTON_SIZE * 4, BUTTON_SIZE * 3.5, 0);
+  al_draw_bitmap(pieces[color][4], BUTTON_SIZE * 5, BUTTON_SIZE * 3.5, 0);
+}
 void render(chessBoard *board, ALLEGRO_BITMAP *pieces[2][6],
-            ALLEGRO_BITMAP *mark, ALLEGRO_FONT *font) {
+            ALLEGRO_BITMAP *mark, ALLEGRO_FONT *font, bool renderbox) {
   pawn_struct *pwn;
   static const ALLEGRO_COLOR colors[2] = {al_map_rgb(255, 0, 0),
                                           al_map_rgb(0, 255, 0)};
@@ -43,9 +53,12 @@ void render(chessBoard *board, ALLEGRO_BITMAP *pieces[2][6],
                 board->Points[White]);
   al_draw_textf(font, al_map_rgb(0, 255, 0), 800, 640, 0, "Timer: %d:%d",
                 board->Time[White] / 60, board->Time[White] % 60);
+  if (renderbox)
+    renderPromotionBox(pieces, Colors(~(board->playing) & 1));
   al_flip_display();
 }
 int main() {
+  srand(time(nullptr));
   chessBoard board;
   board.clear(1200);
   board.flag_all();
@@ -92,7 +105,9 @@ int main() {
   char active = 1;
   char pframes = 0;
   pawn_struct *pawn;
+  bool renderbox = false;
   short x, y;
+  short Px, Py;
   while (active) {
     al_wait_for_event(queue, &event);
     switch (event.type) {
@@ -102,7 +117,7 @@ int main() {
         pframes = 0;
         board.Time[board.playing]--;
       }
-      render(&board, pieces, mark, font);
+      render(&board, pieces, mark, font, renderbox);
       break;
     case 10:
       switch (event.keyboard.keycode) {
@@ -114,27 +129,59 @@ int main() {
     case 20: // move
       break;
     case 21: // click
+
       x = (int)(event.mouse.x / BUTTON_SIZE);
       y = (int)(event.mouse.y / BUTTON_SIZE);
+
+      if (renderbox) {
+        if (event.mouse.y > BUTTON_SIZE * 3.5 &&
+            event.mouse.y < BUTTON_SIZE * 4.5)
+          switch (x) {
+          case 2:
+            board.layout[Py][Px]->promote(Bishop);
+            renderbox = false;
+            break;
+          case 3:
+            board.layout[Py][Px]->promote(Knight);
+            renderbox = false;
+            break;
+          case 4:
+            board.layout[Py][Px]->promote(Rook);
+            renderbox = false;
+            break;
+          case 5:
+            board.layout[Py][Px]->promote(Queen);
+            renderbox = false;
+            break;
+          }
+      }
       printf("%d = %d\n", (int)(event.mouse.x / BUTTON_SIZE),
              (int)(event.mouse.y / BUTTON_SIZE));
       board.tag((int)(event.mouse.x / BUTTON_SIZE),
                 (int)(event.mouse.y / BUTTON_SIZE));
       printf("<%d>\n", board.moves[y] & 1 << x);
-      if (board.moves[y] & 1 << x)
-        if (board.move(x, y)) {
+      if (board.moves[y] & 1 << x && !renderbox)
+        switch (board.move(x, y)) {
+        case 1:
           printf("Wygrywa %d\n", (~board.playing) & 1);
           board.clear(1200);
+          break;
+        case 2:
+          renderbox = true;
+          Px = x;
+          Py = y;
+          break;
         }
       pawn = board.value((int)(event.mouse.x / BUTTON_SIZE),
                          (int)(event.mouse.y / BUTTON_SIZE));
       board.findMoves((int)(event.mouse.x / BUTTON_SIZE),
                       (int)(event.mouse.y / BUTTON_SIZE));
       board.flag_all();
-      board.cmdBoard(true, White);
-      board.cmdBoard(true, Black);
+      // board.cmdBoard(true, White);
+      // board.cmdBoard(true, Black);
       if (pawn)
         printf("%d , %d \n", pawn->color, pawn->name);
+
       break;
     case 42:
       active = 0;

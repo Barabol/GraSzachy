@@ -29,12 +29,12 @@ public:
   char playing;
   char moves[8];
   char move(short x, short y);
+  pieces *layout[8][8];
 
 private:
   void _flag(const short x, const short y);
   void _flag4szach(const short x, const short y);
   char isunszachable();
-  pieces *layout[8][8];
   char flag[2][8];
   char tag_[2];
   char selected[2];
