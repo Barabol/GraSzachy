@@ -33,7 +33,8 @@ public:
 
 private:
   void _flag(const short x, const short y);
-  void _flag4szach(const short x, const short y);
+  char _flag4szach(const short x, const short y);
+  char simulateMove(short cX, short cY, short nX, short nY);
   char isunszachable();
   char flag[2][8];
   char tag_[2];

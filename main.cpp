@@ -124,6 +124,11 @@ int main() {
       case 59:
         active = 0;
         break;
+      case 18:
+        board.clear(1200);
+        break;
+      default:
+        printf("--%d--\n", event.keyboard.keycode);
       }
       break;
     case 20: // move
@@ -135,7 +140,8 @@ int main() {
 
       if (renderbox) {
         if (event.mouse.y > BUTTON_SIZE * 3.5 &&
-            event.mouse.y < BUTTON_SIZE * 4.5)
+            event.mouse.y < BUTTON_SIZE * 4.5) {
+          board.flag_all();
           switch (x) {
           case 2:
             board.layout[Py][Px]->promote(Bishop);
@@ -154,6 +160,7 @@ int main() {
             renderbox = false;
             break;
           }
+        }
       }
       printf("%d = %d\n", (int)(event.mouse.x / BUTTON_SIZE),
              (int)(event.mouse.y / BUTTON_SIZE));
