@@ -161,6 +161,7 @@ int main() {
             break;
           }
         }
+        board.playing = (~board.playing) & 1;
       }
       printf("%d = %d\n", (int)(event.mouse.x / BUTTON_SIZE),
              (int)(event.mouse.y / BUTTON_SIZE));
@@ -183,8 +184,8 @@ int main() {
                          (int)(event.mouse.y / BUTTON_SIZE));
       board.findMoves((int)(event.mouse.x / BUTTON_SIZE),
                       (int)(event.mouse.y / BUTTON_SIZE));
-      board.flag_all();
-      // board.cmdBoard(true, White);
+      board.flag_all(); // naprawić szachowanie po promocji !!!!
+                        // board.cmdBoard(true, White);
       // board.cmdBoard(true, Black);
       if (pawn)
         printf("%d , %d \n", pawn->color, pawn->name);

@@ -30,6 +30,7 @@ public:
   char moves[8];
   char move(short x, short y);
   pieces *layout[8][8];
+  char selectedBefore[2];
 
 private:
   void _flag(const short x, const short y);
@@ -40,7 +41,6 @@ private:
   char tag_[2];
   char selected[2];
   char flagprototype[8];
-  char selectedBefore[2];
   char szach[2];
   char Kings[2][2];
 };

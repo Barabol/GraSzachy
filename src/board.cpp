@@ -239,13 +239,11 @@ char chessBoard::_flag4szach(
           for (int z = 0; z < 8; z++)
             this->flag[(~this->playing) & 1][z] = this->flagprototype[z];
           return 1;
-        } else
-          for (int z = 0; z < 8; z++)
-            this->flagprototype[z] = 0;
+        }
       }
-      for (int z = 0; z < 8; z++)
-        this->flagprototype[z] = 0;
     }
+    for (int z = 0; z < 8; z++)
+      this->flagprototype[z] = 0;
     for (int m = x + 1, n = y - 1; m < 8 && n > -1; m++, n--) {
       this->flagprototype[n] |= 1 << (m);
       if (this->layout[n][m]) {
@@ -256,9 +254,9 @@ char chessBoard::_flag4szach(
           return 1;
         }
       }
-      for (int z = 0; z < 8; z++)
-        this->flagprototype[z] = 0;
     }
+    for (int z = 0; z < 8; z++)
+      this->flagprototype[z] = 0;
     for (int m = x - 1, n = y + 1; m > -1 && n < 8; m--, n++) {
       this->flagprototype[n] |= 1 << (m);
       if (this->layout[n][m]) {
@@ -269,9 +267,9 @@ char chessBoard::_flag4szach(
           return 1;
         }
       }
-      for (int z = 0; z < 8; z++)
-        this->flagprototype[z] = 0;
     }
+    for (int z = 0; z < 8; z++)
+      this->flagprototype[z] = 0;
     if (piece->Type == Bishop)
       break;
   case Rook:
@@ -331,26 +329,26 @@ char chessBoard::_flag4szach(
       if (x + 1 < 8 && this->layout[y + 1][x + 1] &&
           this->layout[y + 1][x + 1]->Type == King &&
           this->layout[y + 1][x + 1]->Color != piece->Color) {
-        this->flag[piece->Color][y + 1] |= 1 << (x + 1);
+        this->flag[(~this->playing) & 1][y + 1] |= 1 << (x + 1);
         return true;
       }
       if (x - 1 > -1 && this->layout[y + 1][x - 1] &&
           this->layout[y + 1][x - 1]->Type == King &&
           this->layout[y + 1][x - 1]->Color != piece->Color) {
-        this->flag[piece->Color][y + 1] |= 1 << (x - 1);
+        this->flag[(~this->playing) & 1][y + 1] |= 1 << (x - 1);
         return true;
       }
     } else if (y - 1 > -1 && !piece->Color) {
       if (x + 1 < 8 && this->layout[y - 1][x + 1] &&
           this->layout[y - 1][x + 1]->Type == King &&
           this->layout[y - 1][x + 1]->Color != piece->Color) {
-        this->flag[piece->Color][y - 1] |= 1 << (x + 1);
+        this->flag[(~this->playing) & 1][y - 1] |= 1 << (x + 1);
         return true;
       }
       if (x - 1 > -1 && this->layout[y - 1][x - 1] &&
           this->layout[y - 1][x - 1]->Type == King &&
           this->layout[y - 1][x - 1]->Color != piece->Color) {
-        this->flag[piece->Color][y - 1] |= 1 << (x - 1);
+        this->flag[(~this->playing) & 1][y - 1] |= 1 << (x - 1);
         return true;
       }
     }
@@ -360,13 +358,13 @@ char chessBoard::_flag4szach(
       if (x + 2 < 8 && this->layout[y + 1][x + 2] &&
           this->layout[y + 1][x + 2]->Type == King &&
           this->layout[y + 1][x + 2]->Color != piece->Color) {
-        this->flag[piece->Color][y + 1] |= 1 << (x + 2);
+        this->flag[(~this->playing) & 1][y + 1] |= 1 << (x + 2);
         return true;
       }
       if (x - 2 > -1 && this->layout[y + 1][x - 2] &&
           this->layout[y + 1][x - 2]->Type == King &&
           this->layout[y + 1][x - 2]->Color != piece->Color) {
-        this->flag[piece->Color][y + 1] |= 1 << (x - 2);
+        this->flag[(~this->playing) & 1][y + 1] |= 1 << (x - 2);
         return true;
       }
     }
@@ -374,13 +372,13 @@ char chessBoard::_flag4szach(
       if (x + 2 < 8 && this->layout[y - 1][x + 2] &&
           this->layout[y - 1][x + 2]->Type == King &&
           this->layout[y - 1][x + 2]->Color != piece->Color) {
-        this->flag[piece->Color][y - 1] |= 1 << (x + 2);
+        this->flag[(~this->playing) & 1][y - 1] |= 1 << (x + 2);
         return true;
       }
       if (x - 2 > -1 && this->layout[y - 1][x - 2] &&
           this->layout[y - 1][x - 2]->Type == King &&
           this->layout[y - 1][x - 2]->Color != piece->Color) {
-        this->flag[piece->Color][y - 1] |= 1 << (x - 2);
+        this->flag[(~this->playing) & 1][y - 1] |= 1 << (x - 2);
         return true;
       }
     }
@@ -388,13 +386,13 @@ char chessBoard::_flag4szach(
       if (x + 1 < 8 && this->layout[y + 2][x + 1] &&
           this->layout[y + 2][x + 1]->Type == King &&
           this->layout[y + 2][x + 1]->Color != piece->Color) {
-        this->flag[piece->Color][y + 2] |= 1 << (x + 1);
+        this->flag[(~this->playing) & 1][y + 2] |= 1 << (x + 1);
         return true;
       }
-      if (x - 1 > -1 && this->layout[y + 1][x - 2] &&
+      if (x - 1 > -1 && this->layout[y + 2][x - 1] &&
           this->layout[y + 2][x - 1]->Type == King &&
           this->layout[y + 2][x - 1]->Color != piece->Color) {
-        this->flag[piece->Color][y + 2] |= 1 << (x - 1);
+        this->flag[(~this->playing) & 1][y + 2] |= 1 << (x - 1);
         return true;
       }
     }
@@ -402,13 +400,13 @@ char chessBoard::_flag4szach(
       if (x + 1 < 8 && this->layout[y - 2][x + 1] &&
           this->layout[y - 2][x + 1]->Type == King &&
           this->layout[y - 2][x + 1]->Color != piece->Color) {
-        this->flag[piece->Color][y - 2] |= 1 << (x + 1);
+        this->flag[(~this->playing) & 1][y - 2] |= 1 << (x + 1);
         return true;
       }
       if (x - 1 > -1 && this->layout[y - 2][x - 1] &&
           this->layout[y - 2][x - 1]->Type == King &&
           this->layout[y - 2][x - 1]->Color != piece->Color) {
-        this->flag[piece->Color][y - 2] |= 1 << (x - 1);
+        this->flag[(~this->playing) & 1][y - 2] |= 1 << (x - 1);
         return true;
       }
     }
@@ -431,6 +429,16 @@ char chessBoard::isunszachable() {
         heup++;
       }
     }
+  if (heup == 1) {
+    for (int x = 0; x < 8; x++) {
+      spr += this->flag[(~this->playing) & 1][x] & flag[this->playing][x];
+    }
+    printf("%d\n", spr);
+    if (spr)
+      return 0;
+    return 1;
+  }
+  printf(">>>>>>>>>>> %d\n", heup);
   this->cmdBoard(true, (Colors)(~(this->playing) & 1));
   if (heup > 1)
     return 0;
@@ -610,13 +618,7 @@ void chessBoard::flag_all() {
 }
 
 void chessBoard::flagforme(short x, short y) {
-jeszczeraz:
-  if (this->layout[y][x])
-    this->_flag(x, y);
-  else
-    goto jeszczeraz;
-  this->cmdBoard(true, White);
-  this->cmdBoard(true, Black);
+  this->flag[this->playing][y] |= 1 << x;
 }
 void chessBoard::name(short x, short y) {
   if (this->layout[y][x])
